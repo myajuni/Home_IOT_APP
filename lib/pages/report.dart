@@ -10,7 +10,75 @@ class ReportPage extends StatefulWidget {
   State<ReportPage> createState() => _ReportPageState();
 }
 
+class _ReportPageState extends State<ReportPage> {
+  List<double> dailyUsage = [3, 2, 3, 5, 1, 4, 4];
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 0),
+            child: Text(
+              '10월 리포트',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 0),
+            child: Column(
+              children: [
+                Card(
+                  color: Colors.black,
+                  elevation: 16.0,
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Column(
+                      children: [
+                        const Text(
+                          '요일별 에너지 사용량',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        _WeeklyBarChart(dailyUsage: dailyUsage),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12.0),
+                Card(
+                  color: Colors.black,
+                  elevation: 16.0,
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Column(
+                      children: [
+                        const Text(
+                          '일주일 사용량 비교',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        _CompareBarChart(dailyUsage: dailyUsage),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12.0),
+                const SizedBox(height: 12.0),
+              ],
+            ),
+          )
+        ],
+      ),
+    );
+  }
+}
+
 class _WeeklyBarChart extends StatelessWidget {
+  final List<double> dailyUsage;
+
+  const _WeeklyBarChart({required this.dailyUsage, Key? key}) : super(key: key);
+
   LinearGradient get _barsGradient => LinearGradient(
         colors: [
           AppColors.contentColorBlue.darken(20),
@@ -22,22 +90,22 @@ class _WeeklyBarChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AspectRatio(
-      aspectRatio: 1.4,
+    return SizedBox(
+      height: 200, // Adjusted height for better layout
       child: BarChart(
         BarChartData(
           maxY: 25,
           gridData: const FlGridData(show: false),
           borderData: FlBorderData(show: false),
           titlesData: FlTitlesData(
-              leftTitles:
-                  const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-              rightTitles:
-                  const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-              topTitles:
-                  const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-              bottomTitles: AxisTitles(
-                  sideTitles: SideTitles(
+            leftTitles:
+                const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            rightTitles:
+                const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            topTitles:
+                const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            bottomTitles: AxisTitles(
+              sideTitles: SideTitles(
                 showTitles: true,
                 reservedSize: 30,
                 getTitlesWidget: (value, meta) {
@@ -47,7 +115,7 @@ class _WeeklyBarChart extends StatelessWidget {
                     fontSize: 14,
                   );
                   String text;
-                  // TODO: 일별로 바꾸려면 아래의 타이틀을 수정해야 하단 legend가 변경됨
+                  // Map the x value to day names
                   switch (value.toInt()) {
                     case 0:
                       text = 'Mon';
@@ -80,7 +148,9 @@ class _WeeklyBarChart extends StatelessWidget {
                     child: Text(text, style: style),
                   );
                 },
-              ))),
+              ),
+            ),
+          ),
           alignment: BarChartAlignment.spaceAround,
           barTouchData: BarTouchData(
             enabled: true,
@@ -104,30 +174,18 @@ class _WeeklyBarChart extends StatelessWidget {
               },
             ),
           ),
-          // TODO: 일별로 바꾸려면 하단의 데이터를 일 수 만큼 증가시켜야함
-          barGroups: [
-            BarChartGroupData(
-                x: 0,
-                barRods: [BarChartRodData(toY: 3, gradient: _barsGradient)]),
-            BarChartGroupData(
-                x: 1,
-                barRods: [BarChartRodData(toY: 12, gradient: _barsGradient)]),
-            BarChartGroupData(
-                x: 2,
-                barRods: [BarChartRodData(toY: 3, gradient: _barsGradient)]),
-            BarChartGroupData(
-                x: 3,
-                barRods: [BarChartRodData(toY: 20, gradient: _barsGradient)]),
-            BarChartGroupData(
-                x: 4,
-                barRods: [BarChartRodData(toY: 21, gradient: _barsGradient)]),
-            BarChartGroupData(
-                x: 5,
-                barRods: [BarChartRodData(toY: 23, gradient: _barsGradient)]),
-            BarChartGroupData(
-                x: 6,
-                barRods: [BarChartRodData(toY: 8, gradient: _barsGradient)]),
-          ],
+          // Generate barGroups dynamically based on dailyUsage
+          barGroups: List.generate(dailyUsage.length, (index) {
+            return BarChartGroupData(
+              x: index,
+              barRods: [
+                BarChartRodData(
+                  toY: dailyUsage[index],
+                  gradient: _barsGradient,
+                ),
+              ],
+            );
+          }),
         ),
       ),
     );
@@ -135,6 +193,11 @@ class _WeeklyBarChart extends StatelessWidget {
 }
 
 class _CompareBarChart extends StatelessWidget {
+  final List<double> dailyUsage;
+
+  const _CompareBarChart({required this.dailyUsage, Key? key})
+      : super(key: key);
+
   LinearGradient get _barsGradient => LinearGradient(
         colors: [
           AppColors.contentColorBlue.darken(20),
@@ -146,22 +209,28 @@ class _CompareBarChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AspectRatio(
-      aspectRatio: 1.4,
+    // Calculate total and average usage dynamically
+    double totalUsage =
+        dailyUsage.isNotEmpty ? dailyUsage.reduce((a, b) => a + b) : 0;
+    double averageUsage =
+        dailyUsage.isNotEmpty ? totalUsage / dailyUsage.length : 0;
+
+    return SizedBox(
+      height: 200, // Adjusted height for better layout
       child: BarChart(
         BarChartData(
-          maxY: 25,
+          maxY: 25, // Adjust maxY as needed
           gridData: const FlGridData(show: false),
           borderData: FlBorderData(show: false),
           titlesData: FlTitlesData(
-              leftTitles:
-                  const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-              rightTitles:
-                  const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-              topTitles:
-                  const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-              bottomTitles: AxisTitles(
-                  sideTitles: SideTitles(
+            leftTitles:
+                const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            rightTitles:
+                const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            topTitles:
+                const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            bottomTitles: AxisTitles(
+              sideTitles: SideTitles(
                 showTitles: true,
                 reservedSize: 30,
                 getTitlesWidget: (value, meta) {
@@ -188,7 +257,9 @@ class _CompareBarChart extends StatelessWidget {
                     child: Text(text, style: style),
                   );
                 },
-              ))),
+              ),
+            ),
+          ),
           alignment: BarChartAlignment.spaceAround,
           barTouchData: BarTouchData(
             enabled: true,
@@ -212,102 +283,28 @@ class _CompareBarChart extends StatelessWidget {
               },
             ),
           ),
+          // Define barGroups for total and average usage
           barGroups: [
             BarChartGroupData(
-                x: 1,
-                barRods: [BarChartRodData(toY: 12, gradient: _barsGradient)]),
-            BarChartGroupData(
-                x: 0,
-                barRods: [BarChartRodData(toY: 3, gradient: _barsGradient)]),
-            // BarChartGroupData(
-            //     x: 2,
-            //     barRods: [BarChartRodData(toY: 3, gradient: _barsGradient)]),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ReportPageState extends State<ReportPage> {
-  Widget _buildAlertMessage() {
-    return SizedBox(
-      height: 60,
-      child: Card(
-        color: Colors.red.lighten(50),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0),
-          child: Row(
-            children: [
-              const Icon(Icons.warning),
-              const SizedBox(width: 16.0),
-              const Text('이 기기는 점검이 필요해요'),
-              Expanded(child: Container()),
-              Text('확인 하기', style: TextStyle(color: Colors.blue.darken())),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Padding(
-            padding: EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 0),
-            child: Text(
-              '10월 리포트',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 0),
-            child: Column(
-              children: [
-                Card(
-                  color: Colors.black,
-                  elevation: 16.0,
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Column(
-                      children: [
-                        const Text(
-                          '요일별 에너지 사용량',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        _WeeklyBarChart()
-                      ],
-                    ),
-                  ),
+              x: 0,
+              barRods: [
+                BarChartRodData(
+                  toY: totalUsage,
+                  gradient: _barsGradient,
                 ),
-                const SizedBox(height: 12.0),
-                Card(
-                  color: Colors.black,
-                  elevation: 16.0,
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Column(
-                      children: [
-                        const Text(
-                          '일주일 사용량 비교',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        _CompareBarChart()
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12.0),
-                // _buildAlertMessage(),
-                const SizedBox(height: 12.0),
               ],
             ),
-          )
-        ],
+            BarChartGroupData(
+              x: 1,
+              barRods: [
+                BarChartRodData(
+                  toY: averageUsage,
+                  gradient: _barsGradient,
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
