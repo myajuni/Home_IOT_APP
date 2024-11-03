@@ -82,8 +82,6 @@ class _SettingPageState extends State<SettingPage> {
         _buildAccountInfo(),
         const SizedBox(height: 12.0),
         _buildAccountButtonGroup(),
-        // const SizedBox(height: 12.0),
-        // _buildMarketingZone(),
       ],
     );
   }
