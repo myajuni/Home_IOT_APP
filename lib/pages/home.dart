@@ -7,15 +7,16 @@ class _DeviceCard extends StatefulWidget {
   final String info;
   final String src;
   final bool broken;
+  final bool flag;
 
-  const _DeviceCard(this.name, this.info, this.src, this.broken);
+  const _DeviceCard(this.name, this.info, this.src, this.broken, this.flag);
 
   @override
   State<_DeviceCard> createState() => _DeviceCardState();
 }
 
 class _DeviceCardState extends State<_DeviceCard> {
-  bool flag = false;
+  late bool flag = widget.flag;
 
   @override
   Widget build(BuildContext context) {
@@ -30,6 +31,7 @@ class _DeviceCardState extends State<_DeviceCard> {
                 info: widget.info,
                 src: widget.src,
                 broken: widget.broken,
+                flag: flag,
               ),
             ),
           );
@@ -51,7 +53,8 @@ class _DeviceCardState extends State<_DeviceCard> {
                       width: 80,
                       height: 80,
                       colorBlendMode: BlendMode.multiply,
-                      color: flag ? Colors.transparent : Colors.black.lighten(50),
+                      color:
+                          flag ? Colors.transparent : Colors.black.lighten(50),
                     ),
                     Text(widget.name),
                     Text(widget.info),
@@ -96,19 +99,27 @@ class HomePageState extends State<HomePage> {
   Widget _buildRoutineButton({required String label, required String src}) {
     return Column(
       children: [
-        CircleAvatar(
-          backgroundColor: Colors.white,
+        Container(
+          decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.all(Radius.circular(30))),
+          width: 60,
+          height: 60,
+          alignment: Alignment.center,
           child: Padding(
-            padding: const EdgeInsets.all(4.0),
-            child: ClipOval(
-              child: Image.asset(src, fit: BoxFit.contain),
+            padding: const EdgeInsets.all(10.0),
+            child: Text(
+              label,
+              textAlign: TextAlign.center,
             ),
           ),
         ),
-        Text(label)
       ],
     );
   }
+
+  TextEditingController tec = TextEditingController();
+  List<String> routines = [];
 
   Widget _buildRoutineSection() {
     return Column(
@@ -135,8 +146,44 @@ class HomePageState extends State<HomePage> {
               const SizedBox(
                 width: 16,
               ),
+              ...routines.map(
+                (e) => TextButton(
+                    onPressed: () {},
+                    child: _buildRoutineButton(label: '$e 모드', src: '')),
+              ),
               TextButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            title: const Text('모드 추가'),
+                            content: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                TextField(controller: tec),
+                              ],
+                            ),
+                            actions: [
+                              TextButton(
+                                  onPressed: () {
+                                    tec.clear();
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: const Text('닫기')),
+                              TextButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      routines.add(tec.value.text);
+                                    });
+                                    tec.clear();
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: const Text('추가')),
+                            ],
+                          );
+                        });
+                  },
                   child: const Column(
                     children: [Icon(Icons.add), Text('추가')],
                   ))
@@ -159,8 +206,9 @@ class HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildDeviceCard(String name, String info, String src, bool broken) {
-    return _DeviceCard(name, info, src, broken);
+  Widget _buildDeviceCard(
+      String name, String info, String src, bool broken, bool flag) {
+    return _DeviceCard(name, info, src, broken, flag);
   }
 
   Widget _buildDeviceSection() {
@@ -175,10 +223,12 @@ class HomePageState extends State<HomePage> {
             spacing: 12.0,
             runSpacing: 12.0,
             children: [
-              _buildDeviceCard('세탁기', '1:25 남음', 'images/washer.png', true),
-              _buildDeviceCard('에어컨', '25C', 'images/air_conditioner.png', false),
-              _buildDeviceCard('조명', '켜짐', 'images/light.png', false),
-              _buildDeviceCard('TV', '꺼짐', 'images/tv.png', true),
+              _buildDeviceCard(
+                  '세탁기', '1:25 남음', 'images/washer.png', true, false),
+              _buildDeviceCard(
+                  '에어컨', '25C', 'images/air_conditioner.png', false, false),
+              _buildDeviceCard('조명', '켜짐', 'images/light.png', false, false),
+              _buildDeviceCard('TV', '꺼짐', 'images/tv.png', true, false),
               SizedBox(
                 width: 140,
                 height: 140,
