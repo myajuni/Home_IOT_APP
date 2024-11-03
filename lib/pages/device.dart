@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:project/utils/extensions/color_ext.dart';
-import 'package:project/utils/image.dart';
 
 class DevicePage extends StatefulWidget {
   final String name;
   final String info;
   final String src;
   final bool broken;
+  final bool flag;
 
-  const DevicePage(
-      {super.key,
-      required this.name,
-      required this.info,
-      required this.src,
-      required this.broken});
+  const DevicePage({
+    super.key,
+    required this.name,
+    required this.info,
+    required this.src,
+    required this.broken,
+    required this.flag,
+  });
 
   @override
   State<DevicePage> createState() => _DevicePageState();
@@ -79,8 +81,7 @@ class _DevicePageState extends State<DevicePage> {
   }
 
   get controls => [_buildDeviceControl1()];
-
-  bool flag = false;
+  late bool flag = widget.flag;
 
   @override
   Widget build(BuildContext context) {
@@ -102,9 +103,6 @@ class _DevicePageState extends State<DevicePage> {
           ),
           Row(
             children: [
-              // const Text('클린 부스터'),
-              // IconButton(
-              //     onPressed: () {}, icon: const Icon(Icons.arrow_drop_down)),
               Expanded(child: Container()),
               Switch(
                   value: flag,
